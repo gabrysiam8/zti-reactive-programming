@@ -1,4 +1,4 @@
-# Reactive Spring - exercises
+# Reactive Spring - exercise 1
 
 ## Build a REST client
 
