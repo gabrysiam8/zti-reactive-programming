@@ -39,3 +39,43 @@ private Logger logger = LoggerFactory.getLogger(JokeServiceTest.class);
 10. Use the logger inside the `getJoke` method to log the joke, either before or after the assertion.
 11. Execute the test and make any needed corrections until it passes.
 
+
+## Asynchronous Access
+1. In the `JokeService` class, add an attribute of type `WebClient` and use the create method to initialize it to the base URL.
+```
+private WebClient client = WebClient.create("http://api.icndb.com");
+```
+2. Add a new method called `getJokeAsync` that takes two `String` values as arguments called first and last. For the return type use `Mono<String>` instead of `String`. The implementation is:
+```
+public Mono<String> getJokeAsync(String first, String last) {
+    String path = "/jokes/random?limitTo=[nerdy]&firstName={first}&lastName={last}";
+        return client.get()
+            .uri(path, first, last)
+            .retrieve()
+            .bodyToMono(JokeResponse.class)
+            .map(jokeResponse -> jokeResponse.getValue().getJoke());
+}
+```
+3. To test this, go back to the `JokeServiceTest` class. There are two ways to test the method. One is to invoke it and block until the request is complete. A test to do that is shown here:
+```
+@Test
+public void getJokeAsync() {
+    String joke = service.getJokeAsync("Craig", "Walls")
+            .block(Duration.ofSeconds(2));
+    logger.info(joke);
+    assertTrue(joke.contains("Craig") || joke.contains("Walls"));
+}
+```
+4. As an alternative, the Reactor Test project includes a class called `StepVerifier`, which includes assertion methods. A test using that class is given by:
+```
+@Test
+public void useStepVerifier() {
+    StepVerifier.create(service.getJokeAsync("Craig", "Walls"))
+            .assertNext(joke -> {
+                logger.info(joke);
+                assertTrue(joke.contains("Craig") || joke.contains("Walls"));
+            })
+            .verifyComplete();
+}
+```
+5. Both of the new tests should now pass.
