@@ -18,7 +18,7 @@ public class StepVerifierExampleTest {
 
     @Test
     public void expect2ElementsThenError() {
-        classUnderTest.expectOneTwoError(Flux.just("foo", "bar").concatWith(Mono.error(new RuntimeException())));
+        classUnderTest.expectOneTwoError(Flux.just("one", "two").concatWith(Mono.error(new RuntimeException())));
     }
 
     @Test
